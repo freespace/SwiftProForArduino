@@ -1831,10 +1831,19 @@ unsigned char inverse_kinematics(const float in_cartesian[3], float angle[3]) {
 
 			if (y < 0)
 			{
-					angleRot = -atan(x / y) * MATH_TRANS;//angle tranfer 0-180 CCW ??????
+				  // The construction of the arm prevents x being negative, therefore
+				  // when y is < 0, atan is < 0 because we are in the 4th quadrant.
+          // However since the angleRot, angle of rotation of the base joint, is
+          // measured from -y axis, we need to negate the result to get a
+          // positive rotation angle.
+					angleRot = -atan(x / y) * MATH_TRANS;
 			}
 			if (y > 0)
 			{
+			    // Similarly when y > 0, atan is > 0 as it is in the 1st quadrant.
+			    // Further the result is an angle measured from the +y axis. In order
+			    // to convert it to an angle measured from the -y axis we have to
+			    // subtract it from 180.
 					angleRot = 180 - atan(x / y) * MATH_TRANS;//angle tranfer  0-180 CCW
 			}
 	}
@@ -1892,7 +1901,9 @@ unsigned char inverse_kinematics(const float in_cartesian[3], float angle[3]) {
 		return -1;
 	}
 
-
+  // XXX these constrains are not enough. While these are on the range of motion
+  // of the motors, the parallel mechanism itself imposes limits which changes
+  // based on the angle of angleLeft and angleRight.
 	angleRot = constrain(angleRot, 0.00, 180.00);
 	angleLeft = constrain(angleLeft, 0.00, 180.00);
 	angleRight = constrain(angleRight, 0.00, 180.00);
