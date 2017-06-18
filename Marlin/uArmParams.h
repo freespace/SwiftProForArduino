@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file	uArmParams.h
-  * @author	David.Long	
+  * @author	David.Long
   * @email	xiaokun.long@ufactory.cc
   * @date	2017-03-15
   ******************************************************************************
@@ -48,11 +48,24 @@
 
 
 #define MATH_PI 			3.141592653589793238463
-#define MATH_TRANS  		57.2958    
-#define MATH_L1 			106.6	//90.00	
-#define MATH_L2 			13.2		//21.17	
-#define MATH_LOWER_ARM 		142.07	//148.25	
-#define MATH_UPPER_ARM 		158.81	//158.8	//160.2 	
+
+// this is just 180/PI, i.e. degrees per radian
+#define MATH_TRANS  		57.2958
+
+// these seem to be offset constants
+// MATH_L1 seems to correspond to the height of the shoulder joint
+#define MATH_L1 			106.6	//90.00
+
+// MATH_L2 seems to be the X offset of the shoulder joint from the Z rotation
+// axis
+#define MATH_L2 			13.2		//21.17
+
+// MATH_LOWER_ARM is the length of the lower arm in mm
+#define MATH_LOWER_ARM 		142.07	//148.25
+
+// MATH_UPPER_ARM is the length of the upper arm in mm
+#define MATH_UPPER_ARM 		158.81	//158.8	//160.2
+
 //#define MATH_FRONT_HEADER 	69//(29.4+38.6)//43.75)	//25.00// the distance between wrist to the front point we use
 #define MATH_UPPER_LOWER 	MATH_UPPER_ARM/MATH_LOWER_ARM
 
@@ -61,7 +74,7 @@
 #define WORKING          		1
 #define GRABBING        		2
 
-#define PUMP_GRABBING_CURRENT 	70  
+#define PUMP_GRABBING_CURRENT 	70
 
 #define RESULT_BUFFER_SIZE 128
 

@@ -1,13 +1,13 @@
 /**
   ******************************************************************************
   * @file	uArmSwift.cpp
-  * @author	David.Long	
+  * @author	David.Long
   * @email	xiaokun.long@ufactory.cc
   * @date	2017-03-15
   ******************************************************************************
   */
 
-#include "uArmSwift.h" 
+#include "uArmSwift.h"
 #include "macros.h"
 #include "stepper_indirection.h"
 #include "servo.h"
@@ -67,7 +67,7 @@ bool is_play_button_pressed()
 		return false;
 	}
 
-	return true;	
+	return true;
 }
 
 
@@ -113,7 +113,7 @@ void swift_init()
 	enable_all_steppers();
 	servo[0].attach(SERVO0_PIN);
 
-#endif	
+#endif
 	delay(1000);
 
 	init_user_mode();
@@ -158,29 +158,47 @@ void swift_run()
 
 	service.run();
 
-	
-	
+
+
 	if(millis() - tickStartTime >= TICK_INTERVAL)
 	{
 		tickStartTime = millis();
 		tickTaskRun();
-	}   	
+	}
 }
 
 unsigned char getXYZFromAngleOrigin(float& x, float& y, float& z, float rot, float left, float right)
 {
-	// 閿熸枻鎷稾Y骞抽敓鏂ゆ嫹閿熼叺闃熷府鎷烽敓鏂ゆ嫹�?	
-	
-	
+	// 閿熸枻鎷稾Y骞抽敓鏂ゆ嫹閿熼叺闃熷府鎷烽敓鏂ゆ嫹�?
+
+	// stretch is the distance between the base and the end effector. This is
+	// computed by first calculating the position of the elbow joint, which is
+	// simply MATH_LOWER_ARM * cos(left), where left is the rotation of the
+	// shoulder joint where 90 degree is straight up.
+	//
+	// The upper arm pivots on the eblow joint, on the end of which is the end
+	// effector. The position of the end-effector, relative to the elbow joint, is
+	// similarly MATH_UPPER_ARM * cos(right), where right is the rotation of the
+	// elbow joint where 0 is horizontal, 90 is straight down, and -90 is straight
+	// up.
+	//
+	// MATH_L2 seems to be the offset of shoulder joint from the Z rotation axis
 	double stretch = MATH_LOWER_ARM * cos(left / MATH_TRANS) + MATH_UPPER_ARM * cos(right / MATH_TRANS) + MATH_L2;
 
-	// 閿熸枻鎷穁閿熸枻鎷烽敓閰甸槦甯嫹閿熸枻鎷烽�?
+	// 閿熸枻鎷穁閿熸枻鎷烽敓閰甸槦甯嫹閿熸枻鎷�
+  
+  // height is similarly calculated. Here the fact that the shoulder and elbow
+  // joints have 90 degrees definition inverted shows up as a substraction. For
+  // the shoulder joint 90 degrees is maximum height while for the eblow joint
+  // 90 degrees is minimum height. MATH_L1 is the height offset of the shoulder
+  // joint from the base of the uArm Swift.
 	double height = MATH_LOWER_ARM * sin(left / MATH_TRANS) - MATH_UPPER_ARM * sin(right / MATH_TRANS) + MATH_L1;
+
 	x = stretch * cos(rot / MATH_TRANS);
 	y = stretch * sin(rot / MATH_TRANS);
 	z = height;
 
-	return 0;    
+	return 0;
 }
 
 float get_current_height()
@@ -198,7 +216,7 @@ float get_current_height()
 	{
 		angle[i] = get_current_angle(i);
 	}
-	
+
 	debugPrint("angle: %f, %f, %f\r\n", angle[X_AXIS], angle[Y_AXIS], angle[Z_AXIS]);
 
 	// get current pos
@@ -206,7 +224,7 @@ float get_current_height()
 
 	debugPrint("cur_pos: %f, %f, %f\r\n", pos[X_AXIS], pos[Y_AXIS], pos[Z_AXIS]);
 
-	return pos[2];	
+	return pos[2];
 }
 
 void update_current_pos()
@@ -224,7 +242,7 @@ void update_current_pos()
 		current_angle[i] = get_current_angle(i);
 	}
 
-	
+
 	debugPrint("cur_angles: %f, %f, %f, %f\r\n", current_angle[X_AXIS], current_angle[Y_AXIS], current_angle[Z_AXIS], current_angle[E_AXIS]);
 
 	// get current pos
@@ -248,7 +266,7 @@ extern uint16_t code_value_ushort();
 bool fan_disable = false;
 
 
-	
+
 
 bool is_fan_disable()
 {
@@ -268,7 +286,7 @@ void set_fan_disable(bool disable)
 
 void uarm_gcode_G0()
 {
-	if (get_user_mode() == USER_MODE_LASER || get_user_mode() == USER_MODE_PEN) 
+	if (get_user_mode() == USER_MODE_LASER || get_user_mode() == USER_MODE_PEN)
 	{
 		while (last_G0_1_cmd != 0  && block_running) idle();
 
@@ -278,9 +296,9 @@ void uarm_gcode_G0()
 		{
 
 
-			
+
 			debugPrint("laser off");
-			
+
 			// turn off laser
 			analogWrite(FAN_PIN, 0);
 		}
@@ -289,8 +307,8 @@ void uarm_gcode_G0()
 
 void uarm_gcode_G1()
 {
-	if (get_user_mode() == USER_MODE_LASER || get_user_mode() == USER_MODE_PEN) 
-	{	
+	if (get_user_mode() == USER_MODE_LASER || get_user_mode() == USER_MODE_PEN)
+	{
 		while (last_G0_1_cmd == 0  && block_running) idle();
 
 		last_G0_1_cmd = 1;
@@ -298,7 +316,7 @@ void uarm_gcode_G1()
 		if (get_user_mode() == USER_MODE_LASER)
 		{
 
-			
+
 			static uint8_t power = 255;
 
 			if (code_seen('P'))
@@ -307,11 +325,11 @@ void uarm_gcode_G1()
 			}
 
 			debugPrint("laser on p=%d\r\n", power);
-			
+
 			// turn on laser
 			analogWrite(FAN_PIN, power);
 		}
-	}	
+	}
 }
 
 
@@ -324,8 +342,8 @@ void reportString(String string)
 void reportButtonEvent(unsigned char buttonId, unsigned char event)
 {
 	char result[RESULT_BUFFER_SIZE];
-	msprintf(result, "@4 B%d V%d\r\n", buttonId, event); 
-	reportString(result);  
+	msprintf(result, "@4 B%d V%d\r\n", buttonId, event);
+	reportString(result);
 }
 
 void reportPos()
@@ -346,7 +364,7 @@ void reportPos()
 	{
 		angle[i] = get_current_angle(i);
 	}
-	
+
 	debugPrint("angle: %f, %f, %f, %f\r\n", angle[X_AXIS], angle[Y_AXIS], angle[Z_AXIS], angle[E_AXIS]);
 
 	// get current pos
@@ -356,7 +374,7 @@ void reportPos()
 
 	msprintf(result, "@3 X%f Y%f Z%f R%f\r\n", pos[X_AXIS], pos[Y_AXIS], pos[Z_AXIS], angle[3]);
 
-	reportString(result);	
+	reportString(result);
 }
 
 void rotate_frontend_motor()
@@ -377,7 +395,7 @@ void rotate_frontend_motor()
 
 	if (code_seen('F'))
 	{
-		speed = code_value_int();		
+		speed = code_value_int();
 	}
 	else
 	{
@@ -385,17 +403,17 @@ void rotate_frontend_motor()
 	}
 
 
-	
+
 	servo[0].write((int)angle);
-	
+
 }
 
-				
+
 
 void uarm_gcode_M2120()
 {
 	float interval = 0;
-	if (code_seen('V')) 
+	if (code_seen('V'))
 	{
 		interval = code_value_float();
 
@@ -514,7 +532,7 @@ uint8_t uarm_gcode_M2203(char reply[])
 	else
 	{
 		strcpy(reply, "V0");
-	}	
+	}
 
 	return E_OK;
 }
@@ -573,7 +591,7 @@ uint8_t uarm_gcode_M2211(char reply[])
 	else
 	{
 		return E_PARAMETERS_WRONG;
-	}	
+	}
 
 	double resultVal = getE2PROMData(device, addr, type);
 
@@ -636,7 +654,7 @@ void uarm_gcode_M2212()
 	else
 	{
 		return;
-	}	
+	}
 
 	if (code_seen('V'))
 	{
@@ -668,12 +686,12 @@ void uarm_gcode_M2213()
 
 	if (value)
 	{
-		service.setButtonService(true); 
+		service.setButtonService(true);
 	}
 	else
 	{
-		service.setButtonService(false); 
-	}	
+		service.setButtonService(false);
+	}
 }
 
 extern unsigned char inverse_kinematics(const float in_cartesian[3], float angle[3]);
@@ -707,7 +725,7 @@ uint8_t uarm_gcode_M2220(char reply[])
 	else
 	{
 		return E_PARAMETERS_WRONG;
-	}		
+	}
 
 	if (inverse_kinematics(value, angle) == 0)
 	{
@@ -753,13 +771,13 @@ uint8_t uarm_gcode_M2221(char reply[])
 	else
 	{
 		return E_PARAMETERS_WRONG;
-	}		
+	}
 
 	getXYZFromAngle(value[0], value[1], value[2], angle[0], angle[1], angle[2]);
 
 	msprintf(reply, "X%f Y%f Z%f", value[X_AXIS], value[Y_AXIS], value[Z_AXIS]);
 
-	return E_OK;		
+	return E_OK;
 }
 
 uint8_t uarm_gcode_M2222(char reply[])
@@ -768,7 +786,7 @@ uint8_t uarm_gcode_M2222(char reply[])
 	float pos[NUM_AXIS];
 	float value[NUM_AXIS];
 	float angle[NUM_AXIS];
-	
+
 	LOOP_XYZ(i)
 	{
 		if (code_seen(axis_codes[i]))
@@ -808,7 +826,7 @@ uint8_t uarm_gcode_M2222(char reply[])
 	}
 
 	return E_OK;
-	
+
 }
 
 void uarm_gcode_M2231()
@@ -874,7 +892,7 @@ void uarm_gcode_M2234()
 
 		service.disableBT(enable ? false : true);
 	}
-	
+
 }
 
 void uarm_gcode_M2240()
@@ -889,7 +907,7 @@ void uarm_gcode_M2240()
 	else
 	{
 		return;
-	}	
+	}
 
 	if (code_seen('V'))
 	{
@@ -898,12 +916,12 @@ void uarm_gcode_M2240()
 	else
 	{
 		return;
-	}	
+	}
 
 	if (value)
 	{
 		digitalWrite(pin, HIGH);
-	}	
+	}
 	else
 	{
 		digitalWrite(pin, LOW);
@@ -962,7 +980,7 @@ void uarm_gcode_M2400()
 		set_user_mode(mode);
 		update_current_pos();
 	}
-	
+
 }
 
 uint8_t uarm_gcode_M2401(char reply[])
@@ -994,7 +1012,7 @@ uint8_t uarm_gcode_M2401(char reply[])
 		if (value[i] > 4096)
 		{
 			return E_FAIL;
-		} 
+		}
 	}
 
 
@@ -1010,7 +1028,7 @@ uint8_t uarm_gcode_M2401(char reply[])
 void uarm_gcode_M2410()
 {
 	float value = 0;
-	if (code_seen('S')) 
+	if (code_seen('S'))
 	{
 		value = code_value_float();
 	}
@@ -1038,7 +1056,7 @@ void uarm_gcode_M2410()
 void uarm_gcode_M2411()
 {
 	float value = 0;
-	if (code_seen('S')) 
+	if (code_seen('S'))
 	{
 		value = code_value_float();
 
@@ -1047,8 +1065,8 @@ void uarm_gcode_M2411()
 			set_front_end_offset(value);
 
 			update_current_pos();
-		}		
-	}	
+		}
+	}
 }
 
 
@@ -1065,7 +1083,7 @@ uint8_t uarm_gcode_P2200(char reply[])
 
 	msprintf(reply, "B%f L%f R%f", angle[X_AXIS], angle[Y_AXIS], angle[Z_AXIS]);
 
-	return E_OK;	
+	return E_OK;
 }
 
 uint8_t uarm_gcode_P2201(char reply[])
@@ -1099,7 +1117,7 @@ uint8_t uarm_gcode_P2204(char reply[])
 	msprintf(reply, "V%s", SW_VER);
 
 
-	return E_OK;	
+	return E_OK;
 }
 
 uint8_t uarm_gcode_P2205(char reply[])
@@ -1152,7 +1170,7 @@ uint8_t uarm_gcode_P2221(char reply[])
 
 	msprintf(reply, "S%f R%f H%f", polor[X_AXIS], polor[Y_AXIS], polor[Z_AXIS]);
 
-	return E_OK;	
+	return E_OK;
 }
 
 uint8_t uarm_gcode_P2231(char reply[])
@@ -1254,7 +1272,7 @@ uint8_t uarm_gcode_P2250(char reply[])
 	msprintf(reply, "R%d V", get_test_result());
 
 	strcat(reply, getMac());
-	
+
 	return E_OK;
 }
 #endif // SWIFT_TEST_MODE
