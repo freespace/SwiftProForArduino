@@ -45,3 +45,10 @@ The uArm Swift Pro has 4 joints. Starting from the base I call them the
 base joint, the shoulder joint, the elbow joint and the wrist joint. The
 first 3 joint angles are reported by `P2200`, in which B=base,
 L=shoulder and R=elbow. 
+
+## XY Limits
+
+In software the X and Y maximum range is capped at 300
+(`Marlin/Configuration.h`). Physically the end effector cannot get
+within 100 mm of the origin, which is anchored at centre of the base
+joint.
