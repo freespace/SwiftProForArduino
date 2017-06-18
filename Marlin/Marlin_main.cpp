@@ -894,8 +894,8 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
 
-  
-  
+
+
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
@@ -1007,7 +1007,7 @@ void setup() {
 
   swift_init();
 
-  
+
 #endif // UARM_SWIFT
 }
 
@@ -1069,7 +1069,7 @@ void loop() {
 #ifdef UARM_SWIFT
 	service.play();
 #endif // UARM_SWIFT
-  
+
   idle();
 }
 
@@ -1687,7 +1687,7 @@ void get_current_pos_polor(float polor[], float pos[])
 	x = pos[0];
 	y = pos[1];
 	z = pos[2];
-	
+
 	inverse_kinematics(pos, angle);
 
 	double stretch;
@@ -1696,14 +1696,14 @@ void get_current_pos_polor(float polor[], float pos[])
 	polor[0] = stretch;
 	polor[1]= angle[0];
 	polor[2] = z;
-}	
+}
 
 
 void get_pos_from_polor(float pos[], float polor[])
 {
-	pos[2] = polor[2];  
+	pos[2] = polor[2];
 	pos[0] = polor[0] * sin(polor[1] / MATH_TRANS);
-	pos[1] = -polor[0] * cos(polor[1] / MATH_TRANS);	
+	pos[1] = -polor[0] * cos(polor[1] / MATH_TRANS);
 
 }
 
@@ -1716,13 +1716,13 @@ void gcode_get_destination_polor()
 	get_current_pos_polor(current_polor, current_position);
 
 	debugPrint("cur polor:%f %f %f\r\n", current_polor[0], current_polor[1],current_polor[2]);
-	
+
 	LOOP_XYZE(i) {
 		if (code_seen(polor_axis_codes[i]))
 		{
-		
+
 		  polor_destination[i] = code_value_float() + (axis_relative_modes[i] || relative_mode ? current_polor[i] : 0);
-		
+
 		}
 		else
 			polor_destination[i] = current_polor[i];
@@ -1741,14 +1741,14 @@ void gcode_get_destination_polor()
 
 
 	if (code_seen('F') && code_value_linear_units() > 0.0)
-	  feedrate_mm_m = code_value_linear_units();	
+	  feedrate_mm_m = code_value_linear_units();
 
 
 	line_to_destination();
 
 	set_current_to_destination();
 
-	
+
 }
 
 void gcode_get_destination_angle(uint8_t index)
@@ -1759,19 +1759,19 @@ void gcode_get_destination_angle(uint8_t index)
 	inverse_kinematics(current_position, current_angle);
 
 	LOOP_XYZ(i) {
-		
+
 		angle_destination[i] = current_angle[i];
 	}
 
 	if (code_seen('V'))
 	{
-	
+
 	  angle_destination[index] = code_value_float() + (axis_relative_modes[index] || relative_mode ? current_angle[index] : 0);
-	
+
 	}
 
 
-	
+
 	if (code_seen('F') && code_value_linear_units() > 0.0)
 	  feedrate_mm_m = code_value_linear_units();
 
@@ -1786,7 +1786,7 @@ void line_to_destination_angle()
 
 	debugPrint("target: %f, %f, %f\r\n", target[0], target[1], target[2]);
 
-	
+
 	planner.buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], MMM_TO_MMS_SCALED(feedrate_mm_m), active_extruder);
 
 	getXYZFromAngle(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], target[X_AXIS], target[Y_AXIS], target[Z_AXIS]);
@@ -1797,23 +1797,23 @@ void line_to_destination_angle()
 
 
 unsigned char inverse_kinematics(const float in_cartesian[3], float angle[3]) {
-	
+
 	float xIn = 0.0;
 	float zIn = 0.0;
 	float rightAll = 0.0;
 	float sqrtZX = 0.0;
-	float phi = 0.0;	
-	
+	float phi = 0.0;
+
 	float x = in_cartesian[0];
 	float y = in_cartesian[1];
 	float z = in_cartesian[2];
-	
+
 	float angleRot = 0;
 	float angleLeft = 0;
 	float angleRight = 0;
 
 	z += get_height_offset();
-	
+
 	zIn = (z - MATH_L1) / MATH_LOWER_ARM;
 
 	if (x < 0.1)
@@ -1855,7 +1855,7 @@ unsigned char inverse_kinematics(const float in_cartesian[3], float angle[3]) {
 	angleLeft = acos(rightAll) * MATH_TRANS;//cosin law
 
 	angleLeft = angleLeft + phi;
-	angleRight = angleRight - phi;	
+	angleRight = angleRight - phi;
 
 	if(isnan(angleRot)||isnan(angleLeft)||isnan(angleRight))
 	{
@@ -1897,11 +1897,11 @@ unsigned char inverse_kinematics(const float in_cartesian[3], float angle[3]) {
 	angleLeft = constrain(angleLeft, 0.00, 180.00);
 	angleRight = constrain(angleRight, 0.00, 180.00);
 
-	
+
 	angle[0] = angleRot;
 	angle[1] = angleLeft;
 	angle[2] = angleRight;
-	
+
 	return 0;
 
 }
@@ -1911,13 +1911,13 @@ inline void line_to_destination(float fr_mm_m) {
 
 	float target[NUM_AXIS];
 	LOOP_XYZE(i) target[i] = destination[i];
-	
+
 
   	float difference[NUM_AXIS];
 	  LOOP_XYZE(i) difference[i] = target[i] - current_position[i];
 
 
-	  
+
 	  float cartesian_mm = sqrt(sq(difference[X_AXIS]) + sq(difference[Y_AXIS]) + sq(difference[Z_AXIS]));
 	  if (cartesian_mm < 0.000001) cartesian_mm = abs(difference[E_AXIS]);
 	  if (cartesian_mm < 0.000001) return false;
@@ -1925,15 +1925,15 @@ inline void line_to_destination(float fr_mm_m) {
 	  float seconds = cartesian_mm / _feedrate_mm_s;
 	  int steps = max(1, int(SEGMENTS_PER_SECOND * seconds));
 	  float inv_steps = 1.0/steps;
-  
+
 	  //SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
 	  //SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
 	  //SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
- 
+
 	  for (int s = 1; s <= steps; s++) {
-  
+
 		float fraction = float(s) * inv_steps;
-  
+
 		LOOP_XYZE(i)
 		  target[i] = current_position[i] + difference[i] * fraction;\
 
@@ -1945,10 +1945,10 @@ inline void line_to_destination(float fr_mm_m) {
       #if ENABLED(DELTA) && ENABLED(AUTO_BED_LEVELING_FEATURE)
 		  if (!bed_leveling_in_progress) adjust_delta(target);
       #endif
-  
+
 		//DEBUG_POS("target", target);
 		//DEBUG_POS("delta_angle", delta_angle);
-  
+
 		planner.buffer_line(delta_angle[X_AXIS], delta_angle[Y_AXIS], delta_angle[Z_AXIS], target[E_AXIS], _feedrate_mm_s, active_extruder);
 		}
 
@@ -4298,7 +4298,7 @@ inline void gcode_M17() {
   #ifdef UARM_SWIFT
   delay(1000);
   update_current_pos();
-  #endif 
+  #endif
 }
 
 #if ENABLED(SDSUPPORT)
@@ -7373,7 +7373,7 @@ void process_next_command() {
 
 
 
-	if (*current_command == '#') 
+	if (*current_command == '#')
 	{
 		// Get and skip the code number
 		current_command++;
@@ -7389,7 +7389,7 @@ void process_next_command() {
 #endif // UARM_SWIFT
 
 
-  
+
   if (*current_command == 'N' && NUMERIC_SIGNED(current_command[1])) {
     current_command += 2; // skip N[-0-9]
     while (NUMERIC(*current_command)) ++current_command; // skip [0-9]*
@@ -7525,7 +7525,7 @@ void process_next_command() {
       case 90: // G90
         relative_mode = false;
         break;
-	  
+
       case 91: // G91
         relative_mode = true;
         break;
@@ -7554,14 +7554,14 @@ void process_next_command() {
 
 			if (index < 3)
 			{
-				
+
 				gcode_get_destination_angle(index);
 				line_to_destination_angle();
 			}
 			else if (index == 3)
 			{
 				rotate_frontend_motor();
-				
+
 			}
 		}
 		break;
@@ -7584,9 +7584,9 @@ void process_next_command() {
 		gcode_get_destination_polor();
 		relative_mode = false;
 		break;
-	
+
 #endif // UARM_SWIFT
-		
+
     }
     break;
 
@@ -8148,20 +8148,20 @@ void process_next_command() {
 	case 2203:
 		needReply = 1;
 		result = uarm_gcode_M2203(replyBuf);
-		break;		
+		break;
 
 	case 2210:
 		uarm_gcode_M2210();
-		break;		
-	
+		break;
+
 	case 2211:
 		needReply = 1;
 		result = uarm_gcode_M2211(replyBuf);
-		break;		
-	
+		break;
+
 	case 2212:
 		uarm_gcode_M2212();
-		break;			
+		break;
 
 	case 2213:
 		uarm_gcode_M2213();
@@ -8170,12 +8170,12 @@ void process_next_command() {
 	case 2220:
 		needReply = 1;
 		result = uarm_gcode_M2220(replyBuf);
-		break;		
+		break;
 
 	case 2221:
 		needReply = 1;
 		result = uarm_gcode_M2221(replyBuf);
-		break;		
+		break;
 
 	case 2222:
 		needReply = 1;
@@ -8189,31 +8189,31 @@ void process_next_command() {
 
 	case 2232:
 		uarm_gcode_M2232();
-		break;		
+		break;
 
 	case 2233:
 		uarm_gcode_M2233();
-		break;		
+		break;
 
 	case 2234:
 		uarm_gcode_M2234();
-		break;				
+		break;
 
 	case 2300:
 		uarm_gcode_M2300();
-		break;			
+		break;
 
 	case 2301:
 		uarm_gcode_M2301();
 		break;
-	
+
 	case 2302:
 		uarm_gcode_M2302();
-		break;	
-	
+		break;
+
 	case 2240:
 		uarm_gcode_M2240();
-		break;			
+		break;
 
 	  case 2400:
 	  	uarm_gcode_M2400();
@@ -8227,12 +8227,12 @@ void process_next_command() {
 	  case 2410:
 	  	uarm_gcode_M2410();
 	  	break;
-	  
+
 	  case 2411:
 	  	uarm_gcode_M2411();
-	  	break;		
+	  	break;
 
-	  
+
 #endif //UARM_SWIFT
     }
     break;
@@ -8247,12 +8247,12 @@ void process_next_command() {
 			needReply = 1;
 			result = uarm_gcode_P2200(replyBuf);
 			break;
-		
+
 		case 2201:
 			needReply = 1;
 			result = uarm_gcode_P2201(replyBuf);
 			break;
-			
+
 		case 2202:
 			needReply = 1;
 			result = uarm_gcode_P2202(replyBuf);
@@ -8262,17 +8262,17 @@ void process_next_command() {
 			needReply = 1;
 			result = uarm_gcode_P2203(replyBuf);
 			break;
-			
+
 		case 2204:
 			needReply = 1;
 			result = uarm_gcode_P2204(replyBuf);
 			break;
-		
+
 		case 2205:
 			needReply = 1;
 			result = uarm_gcode_P2205(replyBuf);
 			break;
-	
+
 		case 2206:
 			needReply = 1;
 			result = uarm_gcode_P2206(replyBuf);
@@ -8306,7 +8306,7 @@ void process_next_command() {
     case 2234:
       needReply = 1;
       result = uarm_gcode_P2234(replyBuf);
-      break;	  
+      break;
 
     case 2240:
       needReply = 1;
@@ -8321,7 +8321,7 @@ void process_next_command() {
     case 2242:
       needReply = 1;
       result = uarm_gcode_P2242(replyBuf);
-      break;	  
+      break;
 
     case 2245:
       needReply = 1;
@@ -8331,13 +8331,13 @@ void process_next_command() {
 	case 2400:
       needReply = 1;
       result = uarm_gcode_P2400(replyBuf);
-      break;		
+      break;
 
 #ifdef SWIFT_TEST_MODE
     case 2250:
       needReply = 1;
       result = uarm_gcode_P2250(replyBuf);
-      break;		
+      break;
 #endif
 		}
 	  break;
@@ -8360,8 +8360,8 @@ ExitUnknownCommand:
 	  	MYSERIAL.print("$");
 		MYSERIAL.print(serialNum);
 	  	MYSERIAL.print(" ");
-  
-	  	
+
+
 	  }
 
 	  if (needReply)
